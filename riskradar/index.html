@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ef4444" />
+  <meta name="description" content="RiskRadar AI: AI/NLP engine to detect Serious Injury & Fatality (SIF) precursors in Oil India Limited (OIL) safety reports." />
+  <title>RiskRadar AI | OIL SIF Precursor Detection Engine</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Top Global Command Strip -->
+  <header class="app-header">
+    <div class="header-container">
+      
+      <!-- Brand & Organization Badge -->
+      <div class="brand-wrapper">
+        <img src="assets/logo.png" alt="RiskRadar AI Logo" class="brand-logo-img" />
+        <div class="brand-text-block">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="brand-title">RiskRadar AI</span>
+            <span class="sih-tag">OIL HSE</span>
+          </div>
+          <span class="brand-sub-badge">OIL INDIA LIMITED • SIF PRECURSOR ENGINE</span>
+        </div>
+      </div>
+
+      <!-- Center Status & Network Indicator -->
+      <div class="header-center-status">
+        <span id="network-status-indicator" class="network-pill pill-online">● ONLINE (OIL Cloud Sync)</span>
+        <span id="gps-status-badge" class="gps-badge">📍 GPS: Assam Assets</span>
+        <div id="global-voice-monitor-widget" class="header-voice-monitor-pill monitor-pill-standby" title="24/7 Continuous Acoustic & Voice Radar (Listening for Help, Fire, Gas Leak, Emergency)">
+          <span class="monitor-pulse-dot"></span>
+          <span id="global-voice-status-text">RADAR: STANDBY</span>
+          <button id="global-voice-toggle-btn" class="btn-micro-toggle" type="button" title="Toggle 24/7 background voice detection">START</button>
+        </div>
+        <button id="toggle-siren-btn" class="btn btn-outline hidden" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">🔕 Siren Mute</button>
+      </div>
+
+      <!-- Right Actions: Role Selector, SOS & User Profile -->
+      <div class="header-right-actions">
+        <!-- Role-Based Access Dropdown -->
+        <div class="role-selector-pill" title="Switch view perspective">
+          <span class="role-label">Role:</span>
+          <select id="active-role-selector" class="role-dropdown">
+            <option value="Safety Officer" selected>Safety Officer</option>
+            <option value="Admin">Admin</option>
+            <option value="Employee / Reporter">Employee / Reporter</option>
+          </select>
+        </div>
+
+        <!-- Prominent SOS Panic Button -->
+        <button id="header-sos-btn" class="sos-header-btn" title="Initiate emergency alert workflow & siren">
+          🚨 SOS PANIC
+        </button>
+
+        <!-- User Profile Pill -->
+        <div id="header-user-widget" class="user-profile-widget" onclick="window.riskRadarApp.switchTab('profile-view')" style="cursor: pointer;" title="View profile & emergency settings">
+          <div id="header-user-avatar" class="user-avatar-circle">N</div>
+          <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
+            <span id="header-user-name" style="font-size: 0.8rem; font-weight: 700; color: #fff;">Er. N. K. Barua</span>
+            <span id="header-user-role-badge" style="font-size: 0.65rem; color: #60a5fa; font-weight: 600;">Safety Officer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- =========================================================
+       APPLICATION SHELL: LEFT SIDEBAR COLUMN + MAIN VIEW
+       ========================================================= -->
+  <div class="app-shell-container">
+    
+    <!-- Left Navigation Column (Features Sidebar) -->
+    <aside id="app-left-sidebar" class="app-sidebar-column">
+      <div class="sidebar-header-section">
+        <div class="sidebar-brand-box">
+          <img src="assets/logo.png" alt="RiskRadar AI Logo" class="sidebar-brand-logo" />
+          <div class="sidebar-brand-text-wrap">
+            <span class="sidebar-brand-title">RiskRadar AI</span>
+            <span class="sidebar-brand-pill">OIL HSE</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav-menu">
+        <button class="app-nav-link sidebar-nav-link nav-link-active" data-target="dashboard-view" title="Operational Overview & Risk KPIs">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="upload-view" title="Upload Incident Report (PDF, DOCX, TXT, CSV)">
+          <span class="nav-icon">📤</span>
+          <span class="nav-text">Upload Report</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="risk-queue-view" title="Master Incident Registry & Risk Prioritization">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Risk Queue</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="sif-detection-view" title="Explainable AI & Risk Condition Graphs">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-text">SIF Detection & Graph</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="alerts-view" title="Real-Time Precursor Escalation & Alerts">
+          <span class="nav-icon">🚨</span>
+          <span class="nav-text">Alerts</span>
+          <span id="sidebar-alert-badge" class="nav-badge-pill hidden">0</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="capa-view" title="Corrective & Preventive Action Tracker">
+          <span class="nav-icon">🛠️</span>
+          <span class="nav-text">Corrective Actions</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="analytics-view" title="Explainable Safety Analytics & Trends">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Analytics & Trends</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="safety-corner-view" title="OISD / DGMS Guidelines & Checklists">
+          <span class="nav-icon">🦺</span>
+          <span class="nav-text">Safety Corner</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="ai-assistant-view" title="Neural Safety Advisor">
+          <span class="nav-icon">💬</span>
+          <span class="nav-text">AI Assistant</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-title">EMERGENCY & PROTOCOLS</div>
+
+        <button class="app-nav-link sidebar-nav-link" data-target="contacts-onboarding-view" title="Emergency Contacts Network">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Emergency Contacts</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link nav-link-emergency" data-target="emergency-view" title="Emergency SOS & Acoustic Radar">
+          <span class="nav-icon">🆘</span>
+          <span class="nav-text">Emergency SOS</span>
+        </button>
+        <button class="app-nav-link sidebar-nav-link" data-target="profile-view" title="User Profile & Institutional Config">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">Profile & Config</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer-info">
+        <div class="sidebar-info-row">
+          <span class="sidebar-info-dot">●</span>
+          <span>OIL Operational Grid</span>
+        </div>
+        <div class="sidebar-version-tag">RiskRadar v2.4 • Active</div>
+      </div>
+    </aside>
+
+    <!-- Main View Content Area -->
+    <main class="main-content-layout">
+
+    <!-- =====================================================
+         VIEW: DASHBOARD
+         ===================================================== -->
+    <section id="dashboard-view" class="app-view-panel">
+      <!-- Mission Banner -->
+      <div class="sih-mission-banner">
+        <div class="mission-text-block">
+          <span class="mission-tag">OIL INDIA LIMITED • PROCESS SAFETY</span>
+          <h1 class="mission-heading">AI/NLP Engine to Detect Serious Injury & Fatality (SIF) Precursors</h1>
+          <p class="mission-sub">“Detect the warning signs before they become serious incidents.” Analyzing unsafe acts, unsafe conditions, and near misses across OIL operational assets.</p>
+        </div>
+        <div class="mission-actions">
+          <button class="btn btn-danger-glow jump-tab-btn" data-target="upload-view">
+            ⚡ Analyze New Safety Report
+          </button>
+          <button class="btn btn-secondary" onclick="window.riskRadarApp.loadSampleReport('rig_height'); window.riskRadarApp.switchTab('upload-view');">
+            🎯 Demo Rig Height Violation
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Cards (All Risk Tiers: Critical/High, Moderate, Low, Total) -->
+      <div class="kpi-metrics-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-blue">📋</div>
+          <div class="kpi-info">
+            <span class="kpi-label">TOTAL REPORTS</span>
+            <span id="kpi-total-reports" class="kpi-val">--</span>
+            <span class="kpi-trend">All OIL Operational Units</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-card-critical">
+          <div class="kpi-icon-wrap icon-red">🔴</div>
+          <div class="kpi-info">
+            <span class="kpi-label">CRITICAL / HIGH RISK</span>
+            <span id="kpi-high-critical" class="kpi-val">--</span>
+            <span class="kpi-trend text-red">Immediate Stop-Work Escalation</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-card-moderate">
+          <div class="kpi-icon-wrap icon-orange">🟠</div>
+          <div class="kpi-info">
+            <span class="kpi-label">MODERATE RISK</span>
+            <span id="kpi-moderate-risk" class="kpi-val">--</span>
+            <span class="kpi-trend text-orange">Corrective Action Required</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-card-low">
+          <div class="kpi-icon-wrap icon-emerald">🟢</div>
+          <div class="kpi-info">
+            <span class="kpi-label">LOW RISK</span>
+            <span id="kpi-low-risk" class="kpi-val">--</span>
+            <span class="kpi-trend text-emerald">Routine Observational Control</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-red">🚨</div>
+          <div class="kpi-info">
+            <span class="kpi-label">SIF PRECURSORS DETECTED</span>
+            <span id="kpi-sif-precursors" class="kpi-val">--</span>
+            <span class="kpi-trend text-red">High Energy + Barrier Gap</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-purple">🛠️</div>
+          <div class="kpi-info">
+            <span class="kpi-label">ACTIVE CAPA ACTIONS</span>
+            <span id="kpi-open-capa" class="kpi-val">--</span>
+            <span class="kpi-trend">Open / In Progress</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Priority Dashboard Visuals (Trend Chart & Hazard Breakdown) -->
+      <div class="dashboard-visuals-grid">
+        <div class="visual-card">
+          <div class="card-header-flex">
+            <h3 class="card-title">📈 SIF Precursor Trajectory & High-Risk Trends</h3>
+            <span class="status-pill-sub">Weekly Asset Trajectory</span>
+          </div>
+          <div id="sif-trend-chart-container"></div>
+        </div>
+
+        <div class="visual-card">
+          <div class="card-header-flex">
+            <h3 class="card-title">⚡ High-Energy Hazard Distribution (OIL Fields)</h3>
+            <span class="status-pill-sub">Top SIF Categories</span>
+          </div>
+          <div id="hazard-breakdown-container"></div>
+        </div>
+      </div>
+
+      <!-- Recent Reports Summary Table -->
+      <div class="recent-reports-table-card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="card-title">📑 Priority Safety Reports Queue (Sorted by Risk Tier)</h3>
+            <span style="font-size: 0.78rem; color: #94a3b8;">Strictly ordered: 1. 🔴 Critical / High Risk ➔ 2. 🟠 Moderate Risk ➔ 3. 🟢 Low Risk</span>
+          </div>
+          <button class="btn-sm btn-outline jump-tab-btn" data-target="risk-queue-view">View Full Risk Queue →</button>
+        </div>
+
+        <!-- Tier Filter Buttons -->
+        <div class="dashboard-tier-filter-bar">
+          <span class="filter-label">Filter View:</span>
+          <div class="tier-filter-chips">
+            <button type="button" class="tier-chip-btn active-tier-chip" data-tier="ALL">All Tiers</button>
+            <button type="button" class="tier-chip-btn tier-chip-critical" data-tier="CRITICAL_HIGH">🔴 Critical / High</button>
+            <button type="button" class="tier-chip-btn tier-chip-moderate" data-tier="MODERATE">🟠 Moderate</button>
+            <button type="button" class="tier-chip-btn tier-chip-low" data-tier="LOW">🟢 Low</button>
+            <button type="button" class="tier-chip-btn tier-chip-sif" data-tier="SIF_ONLY">🚨 SIF Only</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Risk Tier & Score</th>
+                <th>Classification</th>
+                <th>Incident Description</th>
+                <th>Asset Location</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-recent-reports-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: UPLOAD SAFETY REPORT
+         ===================================================== -->
+    <section id="upload-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">AI/NLP INGESTION</span>
+          <h2 class="section-heading">Submit Safety Report for SIF Precursor Analysis</h2>
+          <p class="section-sub">Upload unsafe-act, unsafe-condition, or near-miss reports from OIL fields. The NLP engine detects high-energy exposures and barrier breakdowns.</p>
+        </div>
+      </div>
+
+      <!-- Demonstration Quick Presets -->
+      <div class="demo-presets-banner">
+        <div class="preset-banner-title">
+          <span>🎯</span>
+          <strong>Field Incident Demonstration Presets (Click to Load):</strong>
+        </div>
+        <div class="presets-buttons-row">
+          <button id="load-sih-demo-btn" class="sample-preset-btn highlight-sih-btn">
+            ⚡ Primary Demo: Rig Derrick Height Violation (14m)
+          </button>
+          <button class="sample-preset-btn" data-sample="gas_leak">
+            ⚠️ Wellhead #47 H2S Gas Leak (28 ppm)
+          </button>
+          <button class="sample-preset-btn" data-sample="confined_space">
+            🕳️ Tank T-104 Confined Space Entry Violation
+          </button>
+          <button class="sample-preset-btn" data-sample="electrical_arc">
+            ⚡ 3.3kV MCC Mud Pump Starter (Bypassed LOTO)
+          </button>
+          <button class="sample-preset-btn" data-sample="routine">
+            📋 Routine Housekeeping Observation
+          </button>
+        </div>
+      </div>
+
+      <div class="upload-workspace-grid">
+        <!-- Input Form -->
+        <div class="upload-form-column">
+          
+          <!-- File Dropzone -->
+          <div id="report-dropzone" class="report-dropzone-box">
+            <input type="file" id="report-file-input" class="hidden" accept=".pdf,.doc,.docx,.txt,.csv,.log" />
+            <div class="dropzone-icon">📄</div>
+            <h4 class="dropzone-text">DRAG & DROP SAFETY REPORT OR BROWSE FILE</h4>
+            <p class="dropzone-sub">Supports PDF, Word (DOC/DOCX), TXT, CSV logs, or incident sheets</p>
+            <button type="button" id="browse-file-btn" class="btn btn-secondary" style="padding: 0.45rem 1.4rem; font-size: 0.85rem; font-weight: 700;">
+              📁 Select File
+            </button>
+          </div>
+
+          <!-- File Upload Alert Banner (Success / Error Notification) -->
+          <div id="file-upload-alert" class="file-upload-alert hidden"></div>
+
+          <!-- Selected File Metadata & Extraction Status Card -->
+          <div id="file-upload-status-card" class="file-status-card hidden">
+            <div class="file-status-top">
+              <div class="file-icon-badge" id="file-icon-badge">PDF</div>
+              <div class="file-info-col">
+                <div class="file-name-row">
+                  <span id="file-status-name" class="file-name-text">filename.pdf</span>
+                  <button type="button" id="remove-file-btn" class="file-remove-btn" title="Remove file">&times;</button>
+                </div>
+                <div class="file-meta-row">
+                  <span id="file-status-type" class="file-meta-pill">PDF Document</span>
+                  <span id="file-status-size" class="file-meta-pill">145 KB</span>
+                  <span id="file-status-badge" class="file-badge-success">✓ Content Parsed</span>
+                </div>
+              </div>
+            </div>
+            <div class="file-progress-track">
+              <div id="file-status-progress-bar" class="file-progress-bar" style="width: 100%;"></div>
+            </div>
+            <div class="file-status-footer">
+              <span id="file-status-message" class="file-status-message">File content successfully parsed into safety incident narrative.</span>
+              <button type="button" id="file-auto-analyze-btn" class="btn-micro-analyze">⚡ Run AI Analysis Now</button>
+            </div>
+          </div>
+
+          <!-- Direct Text Input Area -->
+          <div class="form-group" style="margin-top: 1.2rem;">
+            <label for="report-text-input"><strong>Incident / Unsafe Act / Near-Miss Narrative *</strong></label>
+            <textarea id="report-text-input" class="form-textarea" rows="6" placeholder="Paste or type safety observation here... (e.g. Worker observed at 14m derrick platform without safety harness or tie-off near an unprotected open edge during pipe tripping...)"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="report-location-input">Asset Location</label>
+              <input type="text" id="report-location-input" class="form-input" value="OIL Drilling Rig-21, Duliajan" />
+            </div>
+            <div class="form-group">
+              <label for="report-dept-input">Operational Department</label>
+              <input type="text" id="report-dept-input" class="form-input" value="Drilling & Workover Services (D&WS)" />
+            </div>
+          </div>
+
+          <div class="upload-actions-bar">
+            <button id="run-sif-analysis-btn" class="btn btn-danger-glow" style="padding: 0.9rem 2rem; font-size: 1.05rem;">
+              ⚡ Run AI/NLP SIF Precursor Analysis
+            </button>
+          </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="upload-guidelines-column">
+          <div class="info-guide-card">
+            <h4 class="guide-title">🛡️ What RiskRadar AI Scans For:</h4>
+            <ul class="guide-list">
+              <li><strong>High-Energy Vectors:</strong> Gravity >1.8m, Hydrocarbon Gas (H2S/LEL), High Pressure, Confined Space, Electrical Arc, Suspended Loads.</li>
+              <li><strong>Barrier Failure Taxonomy:</strong> Absence of Harness, Missing Guardrail, Missing LOTO, Inadequate SCBA, Missing PTW permit.</li>
+              <li><strong>Classification:</strong> Unsafe Act, Unsafe Condition, or High-Potential Near Miss.</li>
+              <li><strong>Responsible XAI:</strong> Objective probability scores, confidence intervals, and uncertainty disclosures.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: SIF DETECTION & EXPLAINABLE AI WORKSPACE
+         ===================================================== -->
+    <section id="sif-detection-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">EXPLAINABLE AI (XAI)</span>
+          <h2 class="section-heading">SIF Precursor Detection & Energy Barrier Breakdown</h2>
+          <p class="section-sub">Detailed neural risk classification, token highlights, confidence metrics, and automated corrective directives.</p>
+        </div>
+      </div>
+
+      <!-- Dynamic SIF Workspace Card Container -->
+      <div id="sif-workspace-container"></div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: RISK QUEUE
+         ===================================================== -->
+    <section id="risk-queue-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">INCIDENT TRIAGE</span>
+          <h2 class="section-heading">Safety Report Risk Queue & Master Registry</h2>
+          <p class="section-sub">Comprehensive audit of all ingested reports categorized by severity, SIF precursor flag, and asset location.</p>
+        </div>
+      </div>
+
+      <div class="queue-filter-bar">
+        <input type="text" id="queue-search-filter" class="form-input" style="flex: 2;" placeholder="🔍 Search reports by ID, keyword, hazard, or location..." />
+        <select id="queue-level-filter" class="form-input" style="flex: 1;">
+          <option value="ALL">All Risk Levels</option>
+          <option value="SIF_ONLY" selected>🚨 SIF Precursors Only</option>
+          <option value="CRITICAL">Critical Risk</option>
+          <option value="HIGH">High Risk</option>
+          <option value="MODERATE">Moderate Risk</option>
+          <option value="LOW">Low Risk</option>
+        </select>
+      </div>
+
+      <div class="table-responsive">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>Risk Score</th>
+              <th>Classification</th>
+              <th>Description Excerpt</th>
+              <th>Asset Location</th>
+              <th>Date</th>
+              <th>Explainable AI</th>
+            </tr>
+          </thead>
+          <tbody id="risk-queue-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: CRITICAL ALERTS
+         ===================================================== -->
+    <section id="alerts-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">REAL-TIME ESCALATION</span>
+          <h2 class="section-heading">Critical Safety Alerts & Notification Dispatches</h2>
+          <p class="section-sub">Immediate notifications triggered upon SIF precursor detection. Transmitted to safety officers and emergency response centers.</p>
+        </div>
+      <!-- Alert Filter & Control Bar -->
+      <div class="alerts-control-bar">
+        <div class="alert-filter-chips">
+          <button type="button" class="alert-chip-btn active-alert-chip" data-filter="ALL">All Safety Alerts</button>
+          <button type="button" class="alert-chip-btn chip-sif" data-filter="SIF">🚨 SIF Precursor Alerts</button>
+          <button type="button" class="alert-chip-btn chip-critical" data-filter="CRITICAL">🔴 Critical Risk Alerts</button>
+          <button type="button" class="alert-chip-btn chip-dispatched" data-filter="DISPATCHED">📡 Dispatched to OIL Control</button>
+        </div>
+        <button id="btn-refresh-alerts" type="button" class="btn-sm btn-outline" onclick="window.riskRadarApp.renderAlertsView()">
+          🔄 Refresh Alerts Feed
+        </button>
+      </div>
+
+      <div id="critical-alerts-container" class="alerts-feed-grid"></div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: CORRECTIVE ACTIONS (CAPA)
+         ===================================================== -->
+    <section id="capa-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">CAPA WORKFLOW</span>
+          <h2 class="section-heading">Corrective & Preventive Action Lifecycle Tracker</h2>
+          <p class="section-sub">Managing safety barrier restoration from Open ➔ In Progress ➔ Resolved ➔ Closed with digital audit trails.</p>
+        </div>
+      </div>
+
+      <!-- CAPA Metrics Bar -->
+      <div id="capa-metrics-bar" class="capa-metrics-strip"></div>
+
+      <!-- Action Items Cards -->
+      <div id="capa-items-container" class="capa-cards-grid"></div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: ANALYTICS & TRENDS
+         ===================================================== -->
+    <section id="analytics-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">EXECUTIVE INTELLIGENCE</span>
+          <h2 class="section-heading">Industrial Safety Analytics & Recurring Hazard Trends</h2>
+          <p class="section-sub">Predictive trend tracking across Oil India Limited operational bases.</p>
+        </div>
+      </div>
+
+      <div id="analytics-charts-grid" class="analytics-grid"></div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: SAFETY CORNER
+         ===================================================== -->
+    <section id="safety-corner-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">APPROVED OIL / OISD PROCEDURES & EMERGENCY ACTION GUIDELINES</span>
+          <h2 class="section-heading">Oil & Gas Industrial Safety Corner & Emergency Checklists</h2>
+          <p class="section-sub">100% Offline-accessible life-saving rules, OISD/DGMS verification checklists, and crisis response procedures.</p>
+        </div>
+      </div>
+
+      <!-- Offline Safety Search & Category Bar -->
+      <div class="queue-filter-bar" style="margin-bottom: 1.5rem; gap: 0.75rem; flex-wrap: wrap;">
+        <input type="text" id="safety-corner-search" class="form-input" style="flex: 2; min-width: 260px;" placeholder="🔍 Search offline safety guidelines (e.g. gas leak, height, harness, LOTO, fire, CPR)..." />
+        <div style="display: flex; gap: 0.5rem;">
+          <button id="tab-oil-standards-btn" class="btn btn-sm btn-primary-glow" type="button">🛡️ OIL / OISD Standards</button>
+          <button id="tab-emergency-faqs-btn" class="btn btn-sm btn-outline" type="button">🚨 Offline Crisis Action Guides</button>
+        </div>
+      </div>
+
+      <div id="safety-corner-modules-container" class="safety-modules-grid"></div>
+      <div id="safety-faq-modules-container" class="safety-modules-grid hidden"></div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: AI SAFETY ASSISTANT
+         ===================================================== -->
+    <section id="ai-assistant-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">NEURAL SAFETY ADVISOR</span>
+          <h2 class="section-heading">OIL AI Industrial Safety Assistant</h2>
+          <p class="section-sub">Trained on OISD guidelines, DGMS safety standards, and Oil India Limited operating practices.</p>
+        </div>
+      </div>
+
+      <div class="assistant-embedded-container">
+        <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1rem;">
+          Click the floating <strong>"🛡️ Ask AI Safety Guardian"</strong> button in the bottom right corner of your screen anytime, or use the quick suggestion chips to consult the safety AI immediately.
+        </p>
+        <button class="btn btn-primary-glow" onclick="document.getElementById('ai-chat-drawer').classList.remove('collapsed')">
+          💬 Open AI Safety Guardian Drawer
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: EMERGENCY & SOS COMMAND
+         ===================================================== -->
+    <section id="emergency-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">CRISIS INTERVENTION</span>
+          <h2 class="section-heading">Emergency SOS & Real-Time Acoustic Sound Radar</h2>
+          <p class="section-sub">1-second continuous voice detection, blast acoustic spike analysis, and emergency services broadcast.</p>
+        </div>
+      </div>
+
+      <div class="emergency-command-grid">
+        <!-- SOS Button & Dialer -->
+        <div class="emergency-sos-hero-card">
+          <span class="sos-badge-tag">INSTANT PANIC BEACON</span>
+          <button id="main-sos-panic-btn" class="sos-large-circle-btn" onclick="window.riskAlertSystem.triggerManualSOS()" title="Click anywhere inside circle to trigger emergency alarm">
+            <span class="sos-title">SOS</span>
+            <span class="sos-sub-text">TAP TO SOUND ALARM</span>
+          </button>
+          <p style="font-size: 0.85rem; color: #fca5a5; text-align: center;">
+            Instantly triggers siren & transmits live GPS to OIL Control Room and emergency contacts.
+          </p>
+
+          <div class="emergency-hotlines-box">
+            <h4 style="font-size: 0.85rem; color: #fff; margin-bottom: 0.6rem;">Direct Emergency Hotlines:</h4>
+            <div class="hotline-links-grid">
+              <a href="tel:03742800555" class="hotline-btn">🏢 OIL Control: 0374-2800555</a>
+              <a href="tel:101" class="hotline-btn">🚒 Fire Station: 101</a>
+              <a href="tel:102" class="hotline-btn">🚑 OIL Hospital: 102</a>
+              <a href="tel:112" class="hotline-btn">👮 Police HQ: 112</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1-Second Audio Monitoring Radar -->
+        <div class="emergency-radar-card">
+          <div class="card-header-flex">
+            <h3 class="card-title">🎙️ 1-Second Continuous Acoustic Radar</h3>
+            <div id="monitor-status-badge" class="status-badge status-idle">
+              <span class="status-idle-dot"></span> MONITORING OFF
+            </div>
+          </div>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin: 0.5rem 0 1rem;">
+            Listens every second for: <strong>"Help"</strong>, <strong>"Emergency"</strong>, <strong>"Fire"</strong>, <strong>"Gas Leak"</strong>, <strong>"Bachaao"</strong>, or sudden <strong>explosion/blast acoustic shocks</strong>.
+          </p>
+
+          <div class="visualizer-card">
+            <canvas id="audio-waveform-canvas" width="500" height="130"></canvas>
+            <div class="decibel-meter-strip">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #94a3b8;">ENERGY:</span>
+              <div class="meter-track">
+                <div id="db-meter-fill" class="meter-fill"></div>
+              </div>
+              <span id="current-db-val" class="current-db-display">-- dB</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+            <button id="toggle-monitor-btn" class="btn btn-emerald-glow" style="flex: 1;">
+              ▶️ Activate 24/7 Radar
+            </button>
+            <button id="test-voice-trigger-btn" class="btn btn-secondary">
+              🗣️ Sim "Gas Leak! Help!"
+            </button>
+            <button id="test-blast-trigger-btn" class="btn btn-secondary">
+              💥 Sim Blast Sound
+            </button>
+          </div>
+
+          <div class="live-feed-panel" style="margin-top: 1rem;">
+            <div class="live-feed-title">REAL-TIME RADAR TELEMETRY:</div>
+            <div id="live-transcript-log" class="live-log-container">
+              <div class="log-entry log-system"><span class="log-time">[System]</span> Radar initialized. Awaiting user activation.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: PROFILE & EMERGENCY SETTINGS
+         ===================================================== -->
+    <section id="profile-view" class="app-view-panel hidden">
+      <div class="panel-header-strip">
+        <div>
+          <span class="section-tag">CONFIGURATION & DIRECTORY</span>
+          <h2 class="section-heading">Personnel Profile & Configurable Emergency Services</h2>
+          <p class="section-sub">Configure trusted personal emergency contacts and institutional OIL emergency units.</p>
+        </div>
+      </div>
+
+      <div class="profile-config-grid">
+        <!-- Personal Contacts Form -->
+        <div class="config-card">
+          <h3 class="config-card-title">👥 Personal Emergency Contacts (Min. 2 Required)</h3>
+          <p class="config-card-sub">Automated alerts broadcast to these contacts during distress.</p>
+          
+          <form id="cfg-contacts-form">
+            <div class="config-sub-box">
+              <strong>Contact #1:</strong>
+              <div class="form-row" style="margin-top: 0.5rem;">
+                <input type="text" id="cfg-c1-name" class="form-input" value="Dr. P. Gogoi" placeholder="Full Name *" />
+                <input type="tel" id="cfg-c1-phone" class="form-input" value="+91-94350-12345" placeholder="Phone *" />
+              </div>
+              <div class="form-row">
+                <input type="text" id="cfg-c1-rel" class="form-input" value="OIL HSE Manager" placeholder="Relationship" />
+                <input type="email" id="cfg-c1-email" class="form-input" value="hse_manager@oilindia.in" placeholder="Email" />
+              </div>
+            </div>
+
+            <div class="config-sub-box" style="margin-top: 1rem;">
+              <strong>Contact #2:</strong>
+              <div class="form-row" style="margin-top: 0.5rem;">
+                <input type="text" id="cfg-c2-name" class="form-input" value="Ananya Barua" placeholder="Full Name *" />
+                <input type="tel" id="cfg-c2-phone" class="form-input" value="+91-98640-54321" placeholder="Phone *" />
+              </div>
+              <div class="form-row">
+                <input type="text" id="cfg-c2-rel" class="form-input" value="Spouse / Family" placeholder="Relationship" />
+                <input type="email" id="cfg-c2-email" class="form-input" value="ananya.b@family.in" placeholder="Email" />
+              </div>
+            </div>
+
+            <button id="save-emergency-contacts-btn" type="button" class="btn btn-primary-glow" style="margin-top: 1.2rem; width: 100%;">
+              💾 Save Personal Emergency Contacts
+            </button>
+          </form>
+        </div>
+
+        <!-- Institutional Services Config -->
+        <div class="config-card">
+          <h3 class="config-card-title">🏢 Configurable Institutional Emergency Services</h3>
+          <p class="config-card-sub">Designate local OIL Control Rooms, Fire Stations, Hospitals, and Police.</p>
+          
+          <form id="cfg-services-form">
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label>OIL Central Control Room Phone</label>
+              <input type="text" id="cfg-ctrl-phone" class="form-input" value="0374-2800555" />
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label>OIL Control Room Email</label>
+              <input type="email" id="cfg-ctrl-email" class="form-input" value="controlroom@oilindia.in" />
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label>Industrial Fire Station Phone</label>
+              <input type="text" id="cfg-fire-phone" class="form-input" value="0374-2800101" />
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label>OIL Hospital / Trauma Center Phone</label>
+              <input type="text" id="cfg-hosp-phone" class="form-input" value="0374-2800222" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+              <label>District Police Control Room Phone</label>
+              <input type="text" id="cfg-police-phone" class="form-input" value="0374-2800100" />
+            </div>
+
+            <button id="save-emergency-services-btn" type="button" class="btn btn-primary-glow" style="width: 100%;">
+              💾 Update Emergency Services Registry
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: EMERGENCY CONTACTS ONBOARDING (STEP 2 AFTER LOGIN)
+         ===================================================== -->
+    <section id="contacts-onboarding-view" class="app-view-panel hidden">
+      <div class="onboarding-card">
+        <div class="onboarding-header">
+          <span class="badge-step">STEP 2 OF 2 • MANDATORY ESCALATION DIRECTORY</span>
+          <h2 class="onboarding-title">Configure Trusted Emergency Contacts & Response Units</h2>
+          <p class="onboarding-desc">
+            To ensure fail-safe industrial hazard response, RiskRadar AI requires <strong>at least two trusted emergency contacts</strong> (HSE Officer, Shift In-charge, Family) and verified <strong>OIL Institutional Emergency Services</strong>. Upon any confirmed SIF precursor or SOS trigger, high-priority dispatches with live GPS coordinates are sent instantly.
+          </p>
+        </div>
+
+        <form id="onboarding-contacts-form">
+          <div class="contacts-grid">
+            <!-- Contact 1 -->
+            <div class="contact-entry-card">
+              <div class="contact-entry-header">
+                <span class="contact-entry-title">🛡️ Emergency Contact #1</span>
+                <span class="required-badge">REQUIRED</span>
+              </div>
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="onboard-c1-name">Full Name *</label>
+                <input type="text" id="onboard-c1-name" class="form-input" required value="Dr. P. Gogoi" placeholder="e.g. Dr. P. Gogoi" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="onboard-c1-rel">Relationship</label>
+                  <input type="text" id="onboard-c1-rel" class="form-input" value="OIL HSE Manager" placeholder="HSE Manager / Safety Officer" />
+                </div>
+                <div class="form-group">
+                  <label for="onboard-c1-phone">Phone Number *</label>
+                  <input type="tel" id="onboard-c1-phone" class="form-input" required value="+91-94350-12345" placeholder="+91-94350-12345" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="onboard-c1-email">Official Email</label>
+                <input type="email" id="onboard-c1-email" class="form-input" value="hse_manager@oilindia.in" placeholder="email@oilindia.in" />
+              </div>
+            </div>
+
+            <!-- Contact 2 -->
+            <div class="contact-entry-card">
+              <div class="contact-entry-header">
+                <span class="contact-entry-title">🛡️ Emergency Contact #2</span>
+                <span class="required-badge">REQUIRED</span>
+              </div>
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="onboard-c2-name">Full Name *</label>
+                <input type="text" id="onboard-c2-name" class="form-input" required value="Ananya Barua" placeholder="e.g. Ananya Barua" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="onboard-c2-rel">Relationship</label>
+                  <input type="text" id="onboard-c2-rel" class="form-input" value="Spouse / Personal Guardian" placeholder="Family / Next of Kin" />
+                </div>
+                <div class="form-group">
+                  <label for="onboard-c2-phone">Phone Number *</label>
+                  <input type="tel" id="onboard-c2-phone" class="form-input" required value="+91-98640-54321" placeholder="+91-98640-54321" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="onboard-c2-email">Personal Email</label>
+                <input type="email" id="onboard-c2-email" class="form-input" value="ananya.b@family.in" placeholder="email@family.in" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Institutional Units Summary Box -->
+          <div class="institutional-onboarding-box" style="margin-top: 1.25rem;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; color: #38bdf8; margin-bottom: 0.5rem;">
+              🏢 OIL India Limited Emergency Response Network (Pre-configured):
+            </h4>
+            <div class="service-pill-row">
+              <span class="service-chip">🏢 Central Emergency Control: <strong>0374-2800555</strong></span>
+              <span class="service-chip">🚒 Industrial Fire Station: <strong>0374-2800101 (Hotline 101)</strong></span>
+              <span class="service-chip">🚑 OIL Hospital & Trauma Center: <strong>0374-2800222 (Hotline 102)</strong></span>
+              <span class="service-chip">👮 Police Control: <strong>0374-2800100 (Dial 112)</strong></span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <button id="prefill-onboard-contacts-btn" type="button" class="btn btn-outline" style="font-size: 0.85rem;">
+              ⚡ Quick-Fill Demo Emergency Contacts
+            </button>
+            <button type="submit" class="btn btn-danger-glow" style="padding: 0.85rem 2rem; font-size: 1.05rem;">
+              ✓ Confirm Emergency Contacts & Open Main Dashboard →
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         VIEW: AUTHENTICATION (SIGN UP / LOGIN)
+         ===================================================== -->
+    <section id="auth-view" class="app-view-panel hidden">
+      <div class="auth-view-wrapper">
+        <div class="auth-card">
+          <img src="assets/logo.png" alt="RiskRadar AI" class="auth-header-logo" />
+          <h2 id="auth-title-heading" class="auth-card-title">Create an Account</h2>
+          <span class="auth-card-subhead">OIL INDIA LIMITED • HSE INTELLIGENCE</span>
+          <p id="auth-subtitle-desc" class="auth-card-subtitle">
+            Sign up to access the SIF Precursor Detection Engine & Industrial Safety Portal.
+          </p>
+
+          <!-- Auth Mode Switcher -->
+          <div class="auth-mode-switch">
+            <button id="auth-tab-signup" type="button" class="auth-mode-tab active-tab">📝 Create Account</button>
+            <button id="auth-tab-login" type="button" class="auth-mode-tab">🔑 Sign In</button>
+          </div>
+
+          <!-- OAuth Options -->
+          <div class="social-auth-options">
+            <button id="btn-auth-google" class="social-btn" type="button">
+              <svg class="social-icon" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span id="google-btn-text">Sign Up with Gmail (Google)</span>
+            </button>
+
+            <button id="btn-auth-microsoft" class="social-btn" type="button">
+              <svg class="social-icon" viewBox="0 0 23 23">
+                <rect x="1" y="1" width="10" height="10" fill="#f25022"/>
+                <rect x="12" y="1" width="10" height="10" fill="#7fba00"/>
+                <rect x="1" y="12" width="10" height="10" fill="#00a4ef"/>
+                <rect x="12" y="12" width="10" height="10" fill="#ffb900"/>
+              </svg>
+              <span id="ms-btn-text">Sign Up with Microsoft Account</span>
+            </button>
+          </div>
+
+          <div class="auth-divider"><span id="auth-divider-text">or register with email</span></div>
+
+          <form id="direct-auth-form" class="auth-form">
+            <div id="auth-name-group" class="form-group">
+              <label for="auth-name">Full Name *</label>
+              <input type="text" id="auth-name" class="form-input" value="Er. N. K. Barua" placeholder="e.g. Er. N. K. Barua" required />
+            </div>
+            <div class="form-group">
+              <label for="auth-email">Official / Company Email *</label>
+              <input type="email" id="auth-email" class="form-input" value="nk.barua@oilindia.in" placeholder="name@oilindia.in" required />
+            </div>
+            <div class="form-group">
+              <label for="auth-password">Password *</label>
+              <input type="password" id="auth-password" class="form-input" value="Safety@OIL2026" placeholder="Enter your password" required />
+            </div>
+            <div class="form-group">
+              <label for="auth-role-select">Access Role</label>
+              <select id="auth-role-select" class="form-input">
+                <option value="Safety Officer" selected>Safety Officer</option>
+                <option value="Admin">Admin</option>
+                <option value="Employee / Reporter">Employee / Reporter</option>
+              </select>
+            </div>
+            <button id="auth-submit-btn" type="submit" class="btn btn-primary-glow" style="margin-top: 0.5rem; width: 100%;">
+              Create Account & Provide Emergency Contacts →
+            </button>
+          </form>
+
+          <div style="margin-top: 1rem;">
+            <button id="auth-toggle-mode-link" type="button" class="btn-link" style="background: none; border: none; color: #60a5fa; cursor: pointer; font-size: 0.82rem; text-decoration: underline;">
+              Already have an account? Sign In here
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </div> <!-- /.app-shell-container -->
+
+  <!-- =========================================================
+       FLOATING AI SAFETY GUARDIAN CHATBOT
+       ========================================================= -->
+  <button id="toggle-chat-btn" class="floating-chat-trigger-btn" type="button">
+    <span>🛡️</span> Ask AI Safety Guardian
+  </button>
+
+  <div id="ai-chat-drawer" class="ai-chat-drawer collapsed">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <span class="chat-guardian-icon">🛡️</span>
+        <div>
+          <div class="chat-guardian-name">RiskRadar AI Industrial Assistant</div>
+          <span class="chat-status-pill">● OIL & OISD Guidelines Online</span>
+        </div>
+      </div>
+      <button id="close-chat-btn" class="close-chat-btn" title="Close chat">&times;</button>
+    </div>
+
+    <!-- Quick Prompt Chips -->
+    <div id="chat-quick-chips" class="chat-quick-chips-strip"></div>
+
+    <!-- Chat Messages Scroll Area -->
+    <div id="chat-messages" class="chat-messages-container"></div>
+
+    <!-- Chat Input Form -->
+    <form id="chat-form" class="chat-input-bar">
+      <input type="text" id="chat-user-input" class="chat-input" placeholder="Ask about SIF precursors, PTW, H2S, LOTO..." autocomplete="off" />
+      <button type="submit" class="chat-send-btn">Send</button>
+    </form>
+  </div>
+
+  <!-- =========================================================
+       COUNTDOWN AUTO-ALERT MODAL (5-SECOND CANCEL WINDOW)
+       ========================================================= -->
+  <div id="emergency-alert-modal" class="modal-overlay hidden">
+    <div class="countdown-modal-box">
+      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚠️</div>
+      <h2 id="modal-threat-title" style="color: #ef4444; font-size: 1.5rem; font-weight: 900;">
+        CRITICAL THREAT / SIF PRECURSOR DETECTED
+      </h2>
+      <p id="modal-threat-desc" style="color: #cbd5e1; font-size: 0.95rem; margin: 0.5rem 0;">
+        Acoustic shockwave or high-energy safety precursor identified.
+      </p>
+
+      <div class="countdown-ring">
+        <span id="countdown-timer-val" class="countdown-val">5</span>
+      </div>
+
+      <p style="font-size: 0.85rem; color: #fca5a5; font-weight: 600;">
+        Transmitting emergency alert with live GPS coordinates to OIL Control Room and emergency contacts...
+      </p>
+
+      <div class="modal-actions">
+        <button id="cancel-alert-btn" class="btn btn-secondary">
+          ✖ Cancel (False Alarm)
+        </button>
+        <button id="dispatch-now-btn" class="btn btn-danger-glow">
+          🚨 Broadcast Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       DISPATCH CONFIRMATION MODAL
+       ========================================================= -->
+  <div id="dispatch-success-modal" class="modal-overlay hidden">
+    <div class="dispatch-success-box">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 2rem;">🚨</span>
+        <div>
+          <h2 style="color: #ef4444; font-size: 1.35rem; font-weight: 800;">EMERGENCY ALERTS TRANSMITTED</h2>
+          <span style="font-size: 0.8rem; color: #34d399;">✓ High-Priority Broadcast Dispatched</span>
+        </div>
+      </div>
+
+      <div id="modal-auto-dismiss-banner" class="modal-auto-dismiss-banner">
+        ⏱️ Siren & alert will auto-silence in <strong id="alarm-countdown-seconds">10</strong>s and return to Dashboard...
+      </div>
+
+      <div id="modal-dispatched-services" style="margin-bottom: 1rem;"></div>
+
+      <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.5rem;">Personal Contacts Alerted:</p>
+      <div id="modal-dispatched-contacts"></div>
+
+      <div class="modal-alert-preview">
+        <strong>Transmitted Distress Payload:</strong>
+        <div id="modal-alert-msg-preview"></div>
+      </div>
+
+      <a id="modal-gps-link" class="modal-gps-link" target="_blank">📍 Open Live GPS Coordinates</a>
+
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
+        <button onclick="window.riskAlertSystem.closeAlertAndOpenDashboard()" class="btn btn-secondary" style="flex: 1;">
+          Dismiss & Open Dashboard Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p><strong>RiskRadar AI</strong> • Developed by Team RiskRadar for Oil India Limited (OIL)</p>
+    <p style="margin-top: 0.3rem;">AI/NLP engine to detect Serious Injury & Fatality (SIF) precursors in unsafe-act, unsafe-condition, and near-miss reports.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/sif-engine.js"></script>
+  <script src="js/capa-tracker.js"></script>
+  <script src="js/faq-data.js"></script>
+  <script src="js/safety-corner.js"></script>
+  <script src="js/alert-system.js"></script>
+  <script src="js/audio-monitor.js"></script>
+  <script src="js/ai-chatbot.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
